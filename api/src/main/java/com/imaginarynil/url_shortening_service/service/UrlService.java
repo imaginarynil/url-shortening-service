@@ -6,6 +6,7 @@ import com.imaginarynil.url_shortening_service.exception.UrlNotFoundException;
 import com.imaginarynil.url_shortening_service.repository.UrlRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -27,6 +28,7 @@ public class UrlService {
         }
     }
 
+    @Transactional
     public Url createShortUrl(Url url) throws UrlIsNotValidException {
         // validate url
         if (!isValidUrl(url.getUrl())) {
@@ -43,11 +45,14 @@ public class UrlService {
         return savedUrl;
     }
 
+    @Transactional
     public Url retrieveOriginalUrl(String shortCode) throws UrlNotFoundException {
         Url url = this.urlRepository.findByShortCode(shortCode);
         if(url == null) {
             throw new UrlNotFoundException();
         }
+        url.setAccessCount(url.getAccessCount() + 1);
+        this.urlRepository.save(url);
         return url;
     }
 }
