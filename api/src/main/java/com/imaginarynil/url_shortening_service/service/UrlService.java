@@ -1,5 +1,6 @@
 package com.imaginarynil.url_shortening_service.service;
 
+import com.imaginarynil.url_shortening_service.dto.RetrieveOriginalUrlDto;
 import com.imaginarynil.url_shortening_service.entity.Url;
 import com.imaginarynil.url_shortening_service.exception.UrlIsNotValidException;
 import com.imaginarynil.url_shortening_service.exception.UrlNotFoundException;
@@ -46,13 +47,19 @@ public class UrlService {
     }
 
     @Transactional
-    public Url retrieveOriginalUrl(String shortCode) throws UrlNotFoundException {
+    public RetrieveOriginalUrlDto retrieveOriginalUrl(String shortCode) throws UrlNotFoundException {
         Url url = this.urlRepository.findByShortCode(shortCode);
-        if(url == null) {
+        if (url == null) {
             throw new UrlNotFoundException();
         }
         url.setAccessCount(url.getAccessCount() + 1);
         this.urlRepository.save(url);
-        return url;
+        return new RetrieveOriginalUrlDto(
+                url.getId(),
+                url.getUrl(),
+                url.getShortCode(),
+                url.getCreatedAt(),
+                url.getUpdatedAt()
+        );
     }
 }

@@ -23,8 +23,8 @@ public class Url {
     private String shortCode;
     @Column(updatable = false)
     @CreationTimestamp
-    ZonedDateTime createdAt;
+    private ZonedDateTime createdAt;
     @UpdateTimestamp
-    ZonedDateTime updatedAt;
+    private ZonedDateTime updatedAt;
     private Long accessCount;
 }
