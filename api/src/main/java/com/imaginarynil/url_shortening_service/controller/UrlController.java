@@ -1,7 +1,7 @@
 package com.imaginarynil.url_shortening_service.controller;
 
-import com.imaginarynil.url_shortening_service.ErrorDto;
 import com.imaginarynil.url_shortening_service.dto.CreateShortUrlDto;
+import com.imaginarynil.url_shortening_service.dto.GetUrlStatisticsDto;
 import com.imaginarynil.url_shortening_service.dto.RetrieveOriginalUrlDto;
 import com.imaginarynil.url_shortening_service.entity.Url;
 import com.imaginarynil.url_shortening_service.exception.UrlIsNotValidException;
@@ -58,6 +58,16 @@ public class UrlController {
             return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
         } catch (UrlNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+    }
+
+    @GetMapping("/{shortCode}/stats")
+    ResponseEntity<GetUrlStatisticsDto> getUrlStatistics(@PathVariable String shortCode) {
+        try {
+            GetUrlStatisticsDto savedUrl = this.urlService.getUrlStatistics(shortCode);
+            return ResponseEntity.status(HttpStatus.OK).body(savedUrl);
+        } catch (UrlNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
     }
 }

@@ -1,6 +1,7 @@
 package com.imaginarynil.url_shortening_service.service;
 
 import com.imaginarynil.url_shortening_service.dto.CreateShortUrlDto;
+import com.imaginarynil.url_shortening_service.dto.GetUrlStatisticsDto;
 import com.imaginarynil.url_shortening_service.dto.RetrieveOriginalUrlDto;
 import com.imaginarynil.url_shortening_service.entity.Url;
 import com.imaginarynil.url_shortening_service.exception.UrlIsNotValidException;
@@ -10,10 +11,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.net.MalformedURLException;
 import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
 
 @Service
 @AllArgsConstructor
@@ -43,7 +41,13 @@ public class UrlService {
         savedUrl.setShortCode(shortCode);
         savedUrl.setAccessCount(0L);
         savedUrl = this.urlRepository.save(savedUrl);
-        return new CreateShortUrlDto(savedUrl.getId(), savedUrl.getUrl(), savedUrl.getShortCode(), savedUrl.getCreatedAt(), savedUrl.getUpdatedAt());
+        return new CreateShortUrlDto(
+                savedUrl.getId(),
+                savedUrl.getUrl(),
+                savedUrl.getShortCode(),
+                savedUrl.getCreatedAt(),
+                savedUrl.getUpdatedAt()
+        );
     }
 
     @Transactional
@@ -54,7 +58,12 @@ public class UrlService {
         }
         url.setAccessCount(url.getAccessCount() + 1);
         this.urlRepository.save(url);
-        return new RetrieveOriginalUrlDto(url.getId(), url.getUrl(), url.getShortCode(), url.getCreatedAt(), url.getUpdatedAt());
+        return new RetrieveOriginalUrlDto(
+                url.getId(),
+                url.getUrl(),
+                url.getShortCode(),
+                url.getCreatedAt(),
+                url.getUpdatedAt());
     }
 
     public RetrieveOriginalUrlDto updateShortUrl(String shortCode, Url url) {
@@ -69,7 +78,13 @@ public class UrlService {
         }
         savedUrl.setUrl(url.getUrl());
         Url newUrl = this.urlRepository.save(savedUrl);
-        return new RetrieveOriginalUrlDto(newUrl.getId(), newUrl.getUrl(), newUrl.getShortCode(), newUrl.getCreatedAt(), newUrl.getUpdatedAt());
+        return new RetrieveOriginalUrlDto(
+                newUrl.getId(),
+                newUrl.getUrl(),
+                newUrl.getShortCode(),
+                newUrl.getCreatedAt(),
+                newUrl.getUpdatedAt()
+        );
     }
 
     public void deleteShortUrl(String shortCode) {
@@ -78,5 +93,20 @@ public class UrlService {
             throw new UrlNotFoundException();
         }
         this.urlRepository.delete(savedUrl);
+    }
+
+    public GetUrlStatisticsDto getUrlStatistics(String shortCode) {
+        Url savedUrl = this.urlRepository.findByShortCode(shortCode);
+        if (savedUrl == null) {
+            throw new UrlNotFoundException();
+        }
+        return new GetUrlStatisticsDto(
+                savedUrl.getId(),
+                savedUrl.getUrl(),
+                savedUrl.getShortCode(),
+                savedUrl.getCreatedAt(),
+                savedUrl.getUpdatedAt(),
+                savedUrl.getAccessCount()
+        );
     }
 }

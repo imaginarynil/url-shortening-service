@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class UrlShortener {
     private static final String CHARS = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
-    private static int SHORTCODE_LENGTH = 6;
+    private static final int SHORTCODE_LENGTH = 6;
 
     public String convertToBase62(Long id) {
         StringBuilder sb = new StringBuilder();
@@ -15,7 +15,7 @@ public class UrlShortener {
             sb.append(CHARS.charAt(remainder));
             n /= 62;
         }
-        while(sb.length() < SHORTCODE_LENGTH) {
+        while (sb.length() < SHORTCODE_LENGTH) {
             sb.append(0);
         }
         return sb.reverse().toString();
