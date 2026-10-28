@@ -50,4 +50,14 @@ public class UrlController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
     }
+
+    @DeleteMapping("/{shortCode}")
+    ResponseEntity<Void> deleteShortUrl(@PathVariable String shortCode) {
+        try {
+            this.urlService.deleteShortUrl(shortCode);
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+        } catch (UrlNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+    }
 }

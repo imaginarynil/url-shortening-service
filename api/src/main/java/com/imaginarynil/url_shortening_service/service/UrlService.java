@@ -71,4 +71,12 @@ public class UrlService {
         Url newUrl = this.urlRepository.save(savedUrl);
         return new RetrieveOriginalUrlDto(newUrl.getId(), newUrl.getUrl(), newUrl.getShortCode(), newUrl.getCreatedAt(), newUrl.getUpdatedAt());
     }
+
+    public void deleteShortUrl(String shortCode) {
+        Url savedUrl = this.urlRepository.findByShortCode(shortCode);
+        if (savedUrl == null) {
+            throw new UrlNotFoundException();
+        }
+        this.urlRepository.delete(savedUrl);
+    }
 }
