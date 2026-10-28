@@ -1,9 +1,11 @@
 package com.imaginarynil.url_shortening_service.controller;
 
 import com.imaginarynil.url_shortening_service.ErrorDto;
+import com.imaginarynil.url_shortening_service.dto.CreateShortUrlDto;
 import com.imaginarynil.url_shortening_service.dto.RetrieveOriginalUrlDto;
 import com.imaginarynil.url_shortening_service.entity.Url;
 import com.imaginarynil.url_shortening_service.exception.UrlIsNotValidException;
+import com.imaginarynil.url_shortening_service.exception.UrlNotFoundException;
 import com.imaginarynil.url_shortening_service.service.UrlService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -18,9 +20,9 @@ public class UrlController {
     private UrlService urlService;
 
     @PostMapping
-    ResponseEntity<Url> createShortUrl(@RequestBody Url url) {
+    ResponseEntity<CreateShortUrlDto> createShortUrl(@RequestBody Url url) {
         try {
-            Url savedUrl = this.urlService.createShortUrl(url);
+            CreateShortUrlDto savedUrl = this.urlService.createShortUrl(url);
             return ResponseEntity.status(HttpStatus.CREATED).body(savedUrl);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
@@ -37,5 +39,15 @@ public class UrlController {
         }
     }
 
-
+    @PutMapping("/{shortCode}")
+    ResponseEntity<RetrieveOriginalUrlDto> updateShortUrl(@PathVariable String shortCode, @RequestBody Url url) {
+        try {
+            RetrieveOriginalUrlDto newUrl = this.urlService.updateShortUrl(shortCode, url);
+            return ResponseEntity.status(HttpStatus.OK).body(newUrl);
+        } catch (UrlIsNotValidException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        } catch (UrlNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+    }
 }

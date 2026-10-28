@@ -1,5 +1,6 @@
 package com.imaginarynil.url_shortening_service.service;
 
+import com.imaginarynil.url_shortening_service.dto.CreateShortUrlDto;
 import com.imaginarynil.url_shortening_service.dto.RetrieveOriginalUrlDto;
 import com.imaginarynil.url_shortening_service.entity.Url;
 import com.imaginarynil.url_shortening_service.exception.UrlIsNotValidException;
@@ -30,7 +31,7 @@ public class UrlService {
     }
 
     @Transactional
-    public Url createShortUrl(Url url) throws UrlIsNotValidException {
+    public CreateShortUrlDto createShortUrl(Url url) throws UrlIsNotValidException {
         // validate url
         if (!isValidUrl(url.getUrl())) {
             throw new UrlIsNotValidException();
@@ -42,8 +43,7 @@ public class UrlService {
         savedUrl.setShortCode(shortCode);
         savedUrl.setAccessCount(0L);
         savedUrl = this.urlRepository.save(savedUrl);
-        // ret entity
-        return savedUrl;
+        return new CreateShortUrlDto(savedUrl.getId(), savedUrl.getUrl(), savedUrl.getShortCode(), savedUrl.getCreatedAt(), savedUrl.getUpdatedAt());
     }
 
     @Transactional
@@ -54,12 +54,21 @@ public class UrlService {
         }
         url.setAccessCount(url.getAccessCount() + 1);
         this.urlRepository.save(url);
-        return new RetrieveOriginalUrlDto(
-                url.getId(),
-                url.getUrl(),
-                url.getShortCode(),
-                url.getCreatedAt(),
-                url.getUpdatedAt()
-        );
+        return new RetrieveOriginalUrlDto(url.getId(), url.getUrl(), url.getShortCode(), url.getCreatedAt(), url.getUpdatedAt());
+    }
+
+    public RetrieveOriginalUrlDto updateShortUrl(String shortCode, Url url) {
+        // TODO: does this increment the access count?
+        Url savedUrl = this.urlRepository.findByShortCode(shortCode);
+        if (savedUrl == null) {
+            throw new UrlNotFoundException();
+        }
+        // validate url
+        if (!isValidUrl(url.getUrl())) {
+            throw new UrlIsNotValidException();
+        }
+        savedUrl.setUrl(url.getUrl());
+        Url newUrl = this.urlRepository.save(savedUrl);
+        return new RetrieveOriginalUrlDto(newUrl.getId(), newUrl.getUrl(), newUrl.getShortCode(), newUrl.getCreatedAt(), newUrl.getUpdatedAt());
     }
 }
