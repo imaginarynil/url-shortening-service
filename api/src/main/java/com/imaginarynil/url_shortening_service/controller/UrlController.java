@@ -21,8 +21,18 @@ public class UrlController {
         try {
             Url savedUrl = this.urlService.createShortUrl(url);
             return ResponseEntity.status(HttpStatus.CREATED).body(savedUrl);
-        } catch(Exception e) {
+        } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        }
+    }
+
+    @GetMapping("/{shortCode}")
+    ResponseEntity<Url> retrieveOriginalUrl(@PathVariable String shortCode) {
+        try {
+            Url url = this.urlService.retrieveOriginalUrl(shortCode);
+            return ResponseEntity.status(HttpStatus.OK).body(url);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
     }
 }

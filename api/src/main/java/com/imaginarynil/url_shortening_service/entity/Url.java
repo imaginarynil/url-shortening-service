@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.data.annotation.CreatedDate;
 
 import java.time.ZonedDateTime;
@@ -20,11 +21,10 @@ public class Url {
     private Long id;
     private String url;
     private String shortCode;
-    @Column(insertable = false, updatable = false)
+    @Column(updatable = false)
     @CreationTimestamp
     ZonedDateTime createdAt;
-    @Column(insertable = false, updatable = true)
-    @CreationTimestamp
+    @UpdateTimestamp
     ZonedDateTime updatedAt;
     private Long accessCount;
 }
