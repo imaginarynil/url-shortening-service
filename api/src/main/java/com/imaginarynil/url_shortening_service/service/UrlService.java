@@ -1,10 +1,8 @@
 package com.imaginarynil.url_shortening_service.service;
 
-import com.imaginarynil.url_shortening_service.dto.CreateShortUrlDto;
-import com.imaginarynil.url_shortening_service.dto.GetUrlStatisticsDto;
-import com.imaginarynil.url_shortening_service.dto.RetrieveOriginalUrlDto;
-import com.imaginarynil.url_shortening_service.dto.UpdateShortUrlDto;
+import com.imaginarynil.url_shortening_service.dto.*;
 import com.imaginarynil.url_shortening_service.entity.Url;
+import com.imaginarynil.url_shortening_service.exception.UrlExistsException;
 import com.imaginarynil.url_shortening_service.exception.UrlIsNotValidException;
 import com.imaginarynil.url_shortening_service.exception.UrlNotFoundException;
 import com.imaginarynil.url_shortening_service.mapper.UrlMapper;
@@ -37,8 +35,10 @@ public class UrlService {
         if (!isUrlValid(url.getUrl())) {
             throw new UrlIsNotValidException();
         }
+        Url newUrl = new Url();
+        newUrl.setUrl(url.getUrl());
         // insert to database
-        Url savedUrl = this.urlRepository.save(url);
+        Url savedUrl = this.urlRepository.save(newUrl);
         // generate shortcode
         String shortCode = this.urlShortener.convertToBase62(savedUrl.getId());
         savedUrl.setShortCode(shortCode);
@@ -87,5 +87,18 @@ public class UrlService {
             throw new UrlNotFoundException();
         }
         return this.urlMapper.toGetUrlStatisticsDto(savedUrl);
+    }
+
+    public CreateCustomShortUrlDto createCustomShortUrl(Url url) throws UrlIsNotValidException, UrlExistsException {
+        if (!isUrlValid(url.getUrl())) {
+            throw new UrlIsNotValidException();
+        }
+        Url savedUrl = this.urlRepository.findByShortCode(url.getShortCode());
+        if (savedUrl != null) {
+            throw new UrlExistsException();
+        }
+        url.setAccessCount(0L);
+        Url newUrl = this.urlRepository.save(url);
+        return this.urlMapper.toCreateCustomShortUrlDto(newUrl);
     }
 }

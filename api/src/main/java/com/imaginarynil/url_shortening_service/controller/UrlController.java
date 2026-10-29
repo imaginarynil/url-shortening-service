@@ -1,28 +1,34 @@
 package com.imaginarynil.url_shortening_service.controller;
 
-import com.imaginarynil.url_shortening_service.dto.CreateShortUrlDto;
-import com.imaginarynil.url_shortening_service.dto.GetUrlStatisticsDto;
-import com.imaginarynil.url_shortening_service.dto.RetrieveOriginalUrlDto;
-import com.imaginarynil.url_shortening_service.dto.UpdateShortUrlDto;
+import com.imaginarynil.url_shortening_service.dto.*;
 import com.imaginarynil.url_shortening_service.entity.Url;
 import com.imaginarynil.url_shortening_service.exception.UrlIsNotValidException;
 import com.imaginarynil.url_shortening_service.exception.UrlNotFoundException;
+import com.imaginarynil.url_shortening_service.mapper.UrlMapper;
 import com.imaginarynil.url_shortening_service.service.UrlService;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 /* TODO:
-* error handling
-* docker
-* move mapper to controller? */
+ * fix req
+ * add validation
+ * sanitize input
+ * rename to res
+ * error handling
+ * docker
+ * move mapper to controller
+ * simplify dtos
+ * update url validation */
 
 @RestController
 @RequestMapping("/shorten")
 @AllArgsConstructor
 public class UrlController {
     private UrlService urlService;
+    private UrlMapper urlMapper;
 
     @PostMapping
     ResponseEntity<CreateShortUrlDto> createShortUrl(@RequestBody Url url) {
@@ -73,6 +79,16 @@ public class UrlController {
             return ResponseEntity.status(HttpStatus.OK).body(savedUrl);
         } catch (UrlNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+    }
+
+    @PostMapping("/custom")
+    ResponseEntity<CreateCustomShortUrlDto> createCustomShortUrl(@Valid @RequestBody CreateCustomShortUrlReq req) {
+        try {
+            CreateCustomShortUrlDto savedUrl = this.urlService.createCustomShortUrl(urlMapper.toEntityFromCreateCustomShortUrlReq(req));
+            return ResponseEntity.status(HttpStatus.CREATED).body(savedUrl);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
     }
 }
