@@ -6,15 +6,9 @@ import org.mapstruct.Mapper;
 
 @Mapper(componentModel = "spring")
 public interface UrlMapper {
-    CreateShortUrlDto toCreateShortUrlDto(Url url);
+    UrlRes toDto(Url url);
 
-    GetUrlStatisticsDto toGetUrlStatisticsDto(Url url);
-
-    RetrieveOriginalUrlDto toRetrieveOriginalUrlDto(Url url);
-
-    UpdateShortUrlDto toUpdateShortUrlDto(Url url);
-
-    CreateCustomShortUrlDto toCreateCustomShortUrlDto(Url url);
+    GetUrlStatisticsRes toGetUrlStatisticsResDto(Url url);
 
     Url toEntity(CreateCustomShortUrlReq req);
 

@@ -1,11 +1,9 @@
 package com.imaginarynil.url_shortening_service.service;
 
-import com.imaginarynil.url_shortening_service.dto.*;
 import com.imaginarynil.url_shortening_service.entity.Url;
 import com.imaginarynil.url_shortening_service.exception.UrlExistsException;
 import com.imaginarynil.url_shortening_service.exception.UrlIsNotValidException;
 import com.imaginarynil.url_shortening_service.exception.UrlNotFoundException;
-import com.imaginarynil.url_shortening_service.mapper.UrlMapper;
 import com.imaginarynil.url_shortening_service.repository.UrlRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -18,7 +16,6 @@ import java.net.URI;
 public class UrlService {
     private UrlRepository urlRepository;
     private UrlShortener urlShortener;
-    private UrlMapper urlMapper;
 
     boolean isUrlValid(String url) {
         try {
@@ -30,7 +27,7 @@ public class UrlService {
     }
 
     @Transactional
-    public CreateShortUrlDto createShortUrl(Url url) throws UrlIsNotValidException {
+    public Url createShortUrl(Url url) throws UrlIsNotValidException {
         // validate url
         if (!isUrlValid(url.getUrl())) {
             throw new UrlIsNotValidException();
@@ -42,21 +39,21 @@ public class UrlService {
         savedUrl.setShortCode(shortCode);
         savedUrl.setAccessCount(0L);
         savedUrl = this.urlRepository.save(savedUrl);
-        return this.urlMapper.toCreateShortUrlDto(savedUrl);
+        return savedUrl;
     }
 
     @Transactional
-    public RetrieveOriginalUrlDto retrieveOriginalUrl(String shortCode) throws UrlNotFoundException {
+    public Url retrieveOriginalUrl(String shortCode) throws UrlNotFoundException {
         Url savedUrl = this.urlRepository.findByShortCode(shortCode);
         if (savedUrl == null) {
             throw new UrlNotFoundException();
         }
         savedUrl.setAccessCount(savedUrl.getAccessCount() + 1);
         this.urlRepository.save(savedUrl);
-        return this.urlMapper.toRetrieveOriginalUrlDto(savedUrl);
+        return savedUrl;
     }
 
-    public UpdateShortUrlDto updateShortUrl(String shortCode, Url url) {
+    public Url updateShortUrl(String shortCode, Url url) {
         // TODO: does this increment the access count?
         Url savedUrl = this.urlRepository.findByShortCode(shortCode);
         if (savedUrl == null) {
@@ -68,7 +65,7 @@ public class UrlService {
         }
         savedUrl.setUrl(url.getUrl());
         Url newUrl = this.urlRepository.save(savedUrl);
-        return this.urlMapper.toUpdateShortUrlDto(newUrl);
+        return newUrl;
     }
 
     public void deleteShortUrl(String shortCode) {
@@ -79,15 +76,15 @@ public class UrlService {
         this.urlRepository.delete(savedUrl);
     }
 
-    public GetUrlStatisticsDto getUrlStatistics(String shortCode) {
+    public Url getUrlStatistics(String shortCode) {
         Url savedUrl = this.urlRepository.findByShortCode(shortCode);
         if (savedUrl == null) {
             throw new UrlNotFoundException();
         }
-        return this.urlMapper.toGetUrlStatisticsDto(savedUrl);
+        return savedUrl;
     }
 
-    public CreateCustomShortUrlDto createCustomShortUrl(Url url) throws UrlIsNotValidException, UrlExistsException {
+    public Url createCustomShortUrl(Url url) throws UrlIsNotValidException, UrlExistsException {
         if (!isUrlValid(url.getUrl())) {
             throw new UrlIsNotValidException();
         }
@@ -97,6 +94,6 @@ public class UrlService {
         }
         url.setAccessCount(0L);
         Url newUrl = this.urlRepository.save(url);
-        return this.urlMapper.toCreateCustomShortUrlDto(newUrl);
+        return newUrl;
     }
 }
