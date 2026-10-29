@@ -3,6 +3,7 @@ package com.imaginarynil.url_shortening_service.controller;
 import com.imaginarynil.url_shortening_service.dto.CreateShortUrlDto;
 import com.imaginarynil.url_shortening_service.dto.GetUrlStatisticsDto;
 import com.imaginarynil.url_shortening_service.dto.RetrieveOriginalUrlDto;
+import com.imaginarynil.url_shortening_service.dto.UpdateShortUrlDto;
 import com.imaginarynil.url_shortening_service.entity.Url;
 import com.imaginarynil.url_shortening_service.exception.UrlIsNotValidException;
 import com.imaginarynil.url_shortening_service.exception.UrlNotFoundException;
@@ -12,6 +13,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+/* TODO:
+* error handling
+* docker
+* move mapper to controller? */
 
 @RestController
 @RequestMapping("/shorten")
@@ -40,9 +45,9 @@ public class UrlController {
     }
 
     @PutMapping("/{shortCode}")
-    ResponseEntity<RetrieveOriginalUrlDto> updateShortUrl(@PathVariable String shortCode, @RequestBody Url url) {
+    ResponseEntity<UpdateShortUrlDto> updateShortUrl(@PathVariable String shortCode, @RequestBody Url url) {
         try {
-            RetrieveOriginalUrlDto newUrl = this.urlService.updateShortUrl(shortCode, url);
+            UpdateShortUrlDto newUrl = this.urlService.updateShortUrl(shortCode, url);
             return ResponseEntity.status(HttpStatus.OK).body(newUrl);
         } catch (UrlIsNotValidException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
