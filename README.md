@@ -5,3 +5,4 @@ A web app to shorten a URL
 - sanitize input
 - add docker
 - update url validation
+- add redis
