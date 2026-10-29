@@ -46,7 +46,7 @@ public class UrlService {
     public Url retrieveOriginalUrl(String shortCode) throws UrlNotFoundException {
         Url savedUrl = this.urlRepository.findByShortCode(shortCode);
         if (savedUrl == null) {
-            throw new UrlNotFoundException();
+            throw new UrlNotFoundException(UrlNotFoundException.getMessageWithShortCode(shortCode));
         }
         savedUrl.setAccessCount(savedUrl.getAccessCount() + 1);
         this.urlRepository.save(savedUrl);
@@ -57,7 +57,7 @@ public class UrlService {
         // TODO: does this increment the access count?
         Url savedUrl = this.urlRepository.findByShortCode(shortCode);
         if (savedUrl == null) {
-            throw new UrlNotFoundException();
+            throw new UrlNotFoundException(UrlNotFoundException.getMessageWithShortCode(shortCode));
         }
         // validate url
         if (!isUrlValid(url.getUrl())) {
@@ -71,7 +71,7 @@ public class UrlService {
     public void deleteShortUrl(String shortCode) {
         Url savedUrl = this.urlRepository.findByShortCode(shortCode);
         if (savedUrl == null) {
-            throw new UrlNotFoundException();
+            throw new UrlNotFoundException(UrlNotFoundException.getMessageWithShortCode(shortCode));
         }
         this.urlRepository.delete(savedUrl);
     }
@@ -79,7 +79,7 @@ public class UrlService {
     public Url getUrlStatistics(String shortCode) {
         Url savedUrl = this.urlRepository.findByShortCode(shortCode);
         if (savedUrl == null) {
-            throw new UrlNotFoundException();
+            throw new UrlNotFoundException(UrlNotFoundException.getMessageWithShortCode(shortCode));
         }
         return savedUrl;
     }
@@ -90,7 +90,7 @@ public class UrlService {
         }
         Url savedUrl = this.urlRepository.findByShortCode(url.getShortCode());
         if (savedUrl != null) {
-            throw new UrlExistsException();
+            throw new UrlExistsException(UrlExistsException.getMessageWithShortCode(url.getShortCode()));
         }
         url.setAccessCount(0L);
         Url newUrl = this.urlRepository.save(url);

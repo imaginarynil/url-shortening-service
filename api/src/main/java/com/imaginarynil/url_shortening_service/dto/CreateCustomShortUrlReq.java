@@ -13,6 +13,6 @@ public class CreateCustomShortUrlReq {
     private String url;
     @NotBlank(message = "Short code cannot be blank")
     @Size(min = 5, max = 32)
-    @Pattern(regexp = "^[A-Za-z0-9]+$")
+    @Pattern(regexp = "^[A-Za-z0-9]+$", message = "Short code can only contain letters or numbers")
     private String shortCode;
 }
