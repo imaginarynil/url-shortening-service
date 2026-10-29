@@ -9,11 +9,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-/* TODO:
- * sanitize input
- * add docker
- * update url validation */
-
 
 @RestController
 @RequestMapping("/shorten")
