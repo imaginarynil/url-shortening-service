@@ -35,10 +35,8 @@ public class UrlService {
         if (!isUrlValid(url.getUrl())) {
             throw new UrlIsNotValidException();
         }
-        Url newUrl = new Url();
-        newUrl.setUrl(url.getUrl());
         // insert to database
-        Url savedUrl = this.urlRepository.save(newUrl);
+        Url savedUrl = this.urlRepository.save(url);
         // generate shortcode
         String shortCode = this.urlShortener.convertToBase62(savedUrl.getId());
         savedUrl.setShortCode(shortCode);

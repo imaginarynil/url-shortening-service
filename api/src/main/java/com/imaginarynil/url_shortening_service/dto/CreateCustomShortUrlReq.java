@@ -8,6 +8,7 @@ import lombok.Data;
 @Data
 public class CreateCustomShortUrlReq {
     @NotBlank(message = "URL cannot be blank")
+    @Size(max = 2083)
     private String url;
     @NotBlank(message = "Short code cannot be blank")
     @Size(min = 5, max = 32)

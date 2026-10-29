@@ -16,5 +16,7 @@ public interface UrlMapper {
 
     CreateCustomShortUrlDto toCreateCustomShortUrlDto(Url url);
 
-    Url toEntityFromCreateCustomShortUrlReq(CreateCustomShortUrlReq req);
+    Url toEntity(CreateCustomShortUrlReq req);
+
+    Url toEntity(CreateShortUrlReq req);
 }

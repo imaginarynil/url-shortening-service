@@ -16,11 +16,11 @@ import org.springframework.web.bind.annotation.*;
  * fix req
  * add validation
  * sanitize input
- * rename to res
- * error handling
- * docker
+ * rename to res, simplify dtos, simplify mapper
+ * read and error handling
+ * add docker
  * move mapper to controller
- * simplify dtos
+ *
  * update url validation */
 
 @RestController
@@ -31,9 +31,9 @@ public class UrlController {
     private UrlMapper urlMapper;
 
     @PostMapping
-    ResponseEntity<CreateShortUrlDto> createShortUrl(@RequestBody Url url) {
+    ResponseEntity<CreateShortUrlDto> createShortUrl(@Valid @RequestBody CreateShortUrlReq req) {
         try {
-            CreateShortUrlDto savedUrl = this.urlService.createShortUrl(url);
+            CreateShortUrlDto savedUrl = this.urlService.createShortUrl(urlMapper.toEntity(req));
             return ResponseEntity.status(HttpStatus.CREATED).body(savedUrl);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
@@ -85,7 +85,7 @@ public class UrlController {
     @PostMapping("/custom")
     ResponseEntity<CreateCustomShortUrlDto> createCustomShortUrl(@Valid @RequestBody CreateCustomShortUrlReq req) {
         try {
-            CreateCustomShortUrlDto savedUrl = this.urlService.createCustomShortUrl(urlMapper.toEntityFromCreateCustomShortUrlReq(req));
+            CreateCustomShortUrlDto savedUrl = this.urlService.createCustomShortUrl(urlMapper.toEntity(req));
             return ResponseEntity.status(HttpStatus.CREATED).body(savedUrl);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
