@@ -14,6 +14,8 @@ public class UrlRes {
     private Long id;
     private String url;
     private String shortCode;
+    @JsonFormat(pattern = "dd-MM-yyyy hh:mm:ss")
     private ZonedDateTime createdAt;
+    @JsonFormat(pattern = "dd-MM-yyyy hh:mm:ss")
     private ZonedDateTime updatedAt;
 }
