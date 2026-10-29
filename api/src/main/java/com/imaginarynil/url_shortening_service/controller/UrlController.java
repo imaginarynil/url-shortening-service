@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 /* TODO:
  * fix req
+ * fix date format
  * add validation
  * sanitize input
  * rename to res, simplify dtos, simplify mapper
@@ -51,9 +52,9 @@ public class UrlController {
     }
 
     @PutMapping("/{shortCode}")
-    ResponseEntity<UpdateShortUrlDto> updateShortUrl(@PathVariable String shortCode, @RequestBody Url url) {
+    ResponseEntity<UpdateShortUrlDto> updateShortUrl(@PathVariable String shortCode, @Valid @RequestBody UpdateShortUrlReq req) {
         try {
-            UpdateShortUrlDto newUrl = this.urlService.updateShortUrl(shortCode, url);
+            UpdateShortUrlDto newUrl = this.urlService.updateShortUrl(shortCode, urlMapper.toEntity(req));
             return ResponseEntity.status(HttpStatus.OK).body(newUrl);
         } catch (UrlIsNotValidException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);

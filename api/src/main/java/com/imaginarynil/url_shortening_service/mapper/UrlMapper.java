@@ -19,4 +19,6 @@ public interface UrlMapper {
     Url toEntity(CreateCustomShortUrlReq req);
 
     Url toEntity(CreateShortUrlReq req);
+
+    Url toEntity(UpdateShortUrlReq req);
 }
