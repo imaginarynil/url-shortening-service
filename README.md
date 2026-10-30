@@ -1,8 +1,9 @@
 # url-shortening-service
+
 A web app to shorten a URL
 
 ## TODO:
-- sanitize input
+
+- add ui
 - add docker
-- update url validation
 - add redis
