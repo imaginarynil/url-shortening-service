@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/shorten")
 @AllArgsConstructor
+@CrossOrigin
 public class UrlController {
     private UrlService urlService;
     private UrlMapper urlMapper;
