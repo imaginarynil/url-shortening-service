@@ -12,7 +12,7 @@ import {
 } from "antd";
 import axios from "axios";
 import Image from "next/image";
-import { MouseEvent, useState } from "react";
+import { MouseEvent, useEffect, useState } from "react";
 
 const API_BASE_URL = "http://localhost:8080/shorten";
 
@@ -31,6 +31,16 @@ async function retrieveOriginalUrl(shortCode: string) {
     const res = await axios.get(`${API_BASE_URL}/${shortCode}`);
     return res.data;
   } catch (error) {
+    console.error(error);
+    throw error;
+  }
+}
+
+async function updateShortUrl(shortCode: string, url: string) {
+  try {
+    const res = await axios.put(`${API_BASE_URL}/${shortCode}`, { url: url });
+    return res.data;
+  } catch (error: any) {
     console.error(error);
     throw error;
   }
@@ -61,14 +71,22 @@ export default function Home() {
   const [originalUrl, setOriginalUrl] = useState("");
   const [shortCode, setShortCode] = useState("");
   const [action, setAction] = useState<string>(defaultAction);
+  const [urlUpdated, setUrlUpdated] = useState(false);
 
-  function handleCreateShortUrl(url: string) {
+  function validateUrl(url: string) {
     if (url.trim().length === 0) {
       console.log("URL cannot be empty");
-      return;
+      return false;
     }
     if (!isUrlValid(url)) {
       console.log("URL is not valid");
+      return false;
+    }
+    return true;
+  }
+
+  function handleCreateShortUrl(url: string) {
+    if (!validateUrl(url)) {
       return;
     }
     createShortUrl(url)
@@ -78,13 +96,20 @@ export default function Home() {
       .catch((error) => {});
   }
 
-  function handleRetrieveOriginalUrl(shortCode: string) {
+  function validateShortCode(shortCode: string) {
     if (shortCode.trim().length === 0) {
       console.log("Short code cannot be empty");
-      return;
+      return false;
     }
     if (!/^[A-Za-z0-9]+$/.test(shortCode)) {
       console.log("Short code can only contain letters and digits");
+      return false;
+    }
+    return true;
+  }
+
+  function handleRetrieveOriginalUrl(shortCode: string) {
+    if (!validateShortCode) {
       return;
     }
     retrieveOriginalUrl(shortCode)
@@ -94,6 +119,29 @@ export default function Home() {
       .catch((error) => {});
   }
 
+  function handleUpdateShortUrl(shortCode: string, url: string) {
+    if (!validateUrl(url)) {
+      return;
+    }
+    if (!validateShortCode(shortCode)) {
+      return;
+    }
+    updateShortUrl(shortCode, url)
+      .then((data) => {
+        setOriginalUrl(data["url"]);
+        setUrlUpdated(true);
+      })
+      .catch((error) => {});
+  }
+
+  useEffect(() => {
+    setInputUrl("");
+    setOriginalUrl("");
+    setShortCode("");
+    setUrlUpdated(false);
+    setOriginalUrl("");
+  }, [action]);
+
   function handleSubmit(e: any) {
     switch (action) {
       case Action.CREATE_SHORT_URL:
@@ -101,6 +149,9 @@ export default function Home() {
         break;
       case Action.RETRIEVE_ORIGINAL_URL:
         handleRetrieveOriginalUrl(shortCode);
+        break;
+      case Action.UPDATE_SHORT_URL:
+        handleUpdateShortUrl(shortCode, inputUrl);
         break;
       default:
         console.log("Unknown action");
@@ -117,8 +168,16 @@ export default function Home() {
         options={[
           { value: Action.CREATE_SHORT_URL, label: "Create" },
           { value: Action.RETRIEVE_ORIGINAL_URL, label: "Get original" },
+          { value: Action.UPDATE_SHORT_URL, label: "Update" },
         ]}
       />
+      {action === Action.UPDATE_SHORT_URL && (
+        <Input
+          placeholder="Type your short code here..."
+          onChange={(e) => setShortCode(e.target.value)}
+          value={shortCode}
+        />
+      )}
       <Space.Compact style={{ width: "100%" }}>
         {action === Action.RETRIEVE_ORIGINAL_URL ? (
           <Input
@@ -137,9 +196,15 @@ export default function Home() {
           Submit
         </Button>
       </Space.Compact>
-      <Typography.Link href={originalUrl} target="_blank">
-        {originalUrl}
-      </Typography.Link>
+      {(action === Action.RETRIEVE_ORIGINAL_URL ||
+        action === Action.UPDATE_SHORT_URL) && (
+        <Space>
+          {urlUpdated && <Typography.Text>Updated! New URL: </Typography.Text>}{" "}
+          <Typography.Link href={originalUrl} target="_blank">
+            {originalUrl}
+          </Typography.Link>
+        </Space>
+      )}
     </Space>
   );
 }
