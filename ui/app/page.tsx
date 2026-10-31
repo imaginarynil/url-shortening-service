@@ -5,7 +5,7 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 
 const API_BASE_URL = "http://localhost:8080/shorten";
-const UI_BASE_URL = "http://shortener";
+const UI_BASE_URL = "http://shortener.com";
 
 async function createShortUrl(url: string) {
   try {
@@ -47,6 +47,16 @@ async function deleteShortUrl(shortCode: string) {
   }
 }
 
+async function getUrlStatistics(shortCode: string) {
+  try {
+    const res = await axios.get(`${API_BASE_URL}/${shortCode}/stats`);
+    return res.data;
+  } catch (error: any) {
+    console.error(error);
+    throw error;
+  }
+}
+
 function isUrlValid(str: string) {
   let url;
   try {
@@ -66,15 +76,25 @@ const UrlAction = Object.freeze({
   CREATE_CUSTOM_SHORT_URL: "CREATE_CUSTOM_SHORT_URL",
 });
 
+interface Payload {
+  shortenedUrl: string;
+  accessCount: number;
+}
+
 export default function Home() {
   const defaultAction = UrlAction.CREATE_SHORT_URL;
   const [inputUrl, setInputUrl] = useState("");
   const [originalUrl, setOriginalUrl] = useState("");
   const [shortenedUrl, setShortenedUrl] = useState("");
   const [shortCode, setShortCode] = useState("");
+  const [payload, setPayload] = useState<Payload>({
+    shortenedUrl: "",
+    accessCount: 0,
+  });
   const [action, setAction] = useState<string>(defaultAction);
   const [urlUpdated, setUrlUpdated] = useState(false);
   const [urlDeleted, setUrlDeleted] = useState(false);
+  const [urlStatsGot, setUrlStatsGot] = useState(false);
 
   function validateUrl(url: string) {
     if (url.trim().length === 0) {
@@ -150,6 +170,21 @@ export default function Home() {
       .catch((error) => {});
   }
 
+  function handleGetUrlStatistics(shortCode: string) {
+    if (!validateShortCode(shortCode)) {
+      return;
+    }
+    getUrlStatistics(shortCode)
+      .then((data) => {
+        setPayload({
+          shortenedUrl: `${UI_BASE_URL}/${data["shortCode"]}`,
+          accessCount: data["accessCount"],
+        });
+        setUrlStatsGot(true);
+      })
+      .catch((error) => {});
+  }
+
   useEffect(() => {
     setInputUrl("");
     setOriginalUrl("");
@@ -158,6 +193,7 @@ export default function Home() {
     setShortenedUrl("");
     setUrlUpdated(false);
     setUrlDeleted(false);
+    setUrlStatsGot(false);
   }, [action]);
 
   function handleSubmit(e: any) {
@@ -173,6 +209,9 @@ export default function Home() {
         break;
       case UrlAction.DELETE_SHORT_URL:
         handleDeleteShortUrl(shortCode);
+        break;
+      case UrlAction.GET_URL_STATISTICS:
+        handleGetUrlStatistics(shortCode);
         break;
       default:
         console.log("Unknown action");
@@ -191,6 +230,7 @@ export default function Home() {
           { value: UrlAction.RETRIEVE_ORIGINAL_URL, label: "Get original" },
           { value: UrlAction.UPDATE_SHORT_URL, label: "Update" },
           { value: UrlAction.DELETE_SHORT_URL, label: "Delete" },
+          { value: UrlAction.GET_URL_STATISTICS, label: "Get stats" },
         ]}
       />
       {action === UrlAction.UPDATE_SHORT_URL && (
@@ -202,7 +242,8 @@ export default function Home() {
       )}
       <Space.Compact style={{ width: "100%" }}>
         {action === UrlAction.RETRIEVE_ORIGINAL_URL ||
-        action === UrlAction.DELETE_SHORT_URL ? (
+        action === UrlAction.DELETE_SHORT_URL ||
+        action === UrlAction.GET_URL_STATISTICS ? (
           <Input
             placeholder="Type your short code here..."
             onChange={(e) => setShortCode(e.target.value)}
@@ -238,6 +279,12 @@ export default function Home() {
         </Typography.Text>
       )}
       {urlDeleted && <Typography.Text>Deleted {shortCode}</Typography.Text>}
+      {urlStatsGot && (
+        <Typography.Text>
+          {payload.shortenedUrl} has been accessed {payload.accessCount} time
+          {payload.accessCount > 1 && "s"}
+        </Typography.Text>
+      )}
     </Space>
   );
 }
