@@ -70,6 +70,7 @@ export default function Home() {
   const defaultAction = UrlAction.CREATE_SHORT_URL;
   const [inputUrl, setInputUrl] = useState("");
   const [originalUrl, setOriginalUrl] = useState("");
+  const [shortenedUrl, setShortenedUrl] = useState("");
   const [shortCode, setShortCode] = useState("");
   const [action, setAction] = useState<string>(defaultAction);
   const [urlUpdated, setUrlUpdated] = useState(false);
@@ -87,17 +88,6 @@ export default function Home() {
     return true;
   }
 
-  function handleCreateShortUrl(url: string) {
-    if (!validateUrl(url)) {
-      return;
-    }
-    createShortUrl(url)
-      .then((data) => {
-        console.log(data);
-      })
-      .catch((error) => {});
-  }
-
   function validateShortCode(shortCode: string) {
     if (shortCode.trim().length === 0) {
       console.log("Short code cannot be empty");
@@ -108,6 +98,18 @@ export default function Home() {
       return false;
     }
     return true;
+  }
+
+  function handleCreateShortUrl(url: string) {
+    if (!validateUrl(url)) {
+      return;
+    }
+    createShortUrl(url)
+      .then((data) => {
+        setShortenedUrl(`${UI_BASE_URL}/${data["shortCode"]}`);
+        console.log(data);
+      })
+      .catch((error) => {});
   }
 
   function handleRetrieveOriginalUrl(shortCode: string) {
@@ -153,6 +155,7 @@ export default function Home() {
     setOriginalUrl("");
     setShortCode("");
     setOriginalUrl("");
+    setShortenedUrl("");
     setUrlUpdated(false);
     setUrlDeleted(false);
   }, [action]);
@@ -178,7 +181,7 @@ export default function Home() {
 
   return (
     <Space orientation="vertical">
-      <Typography.Text>URL Shortener</Typography.Text>
+      <Typography.Title level={1}>URL Shortener</Typography.Title>
       <Select
         defaultValue={defaultAction}
         style={{ width: 120 }}
@@ -216,22 +219,23 @@ export default function Home() {
           Submit
         </Button>
       </Space.Compact>
+      {action === UrlAction.CREATE_SHORT_URL && (
+        <Typography.Link href={shortenedUrl} target="_blank">
+          {shortenedUrl}
+        </Typography.Link>
+      )}
       {action === UrlAction.RETRIEVE_ORIGINAL_URL && (
         <Typography.Link href={originalUrl} target="_blank">
           {originalUrl}
         </Typography.Link>
       )}
-      {action === UrlAction.UPDATE_SHORT_URL && (
-        <Space>
-          {urlUpdated && (
-            <Typography.Text>
-              Updated. New URL:{" "}
-              <Typography.Link href={originalUrl} target="_blank">
-                {originalUrl}
-              </Typography.Link>
-            </Typography.Text>
-          )}{" "}
-        </Space>
+      {action === UrlAction.UPDATE_SHORT_URL && urlUpdated && (
+        <Typography.Text>
+          Updated. New URL:{" "}
+          <Typography.Link href={originalUrl} target="_blank">
+            {originalUrl}
+          </Typography.Link>
+        </Typography.Text>
       )}
       {urlDeleted && <Typography.Text>Deleted {shortCode}</Typography.Text>}
     </Space>
