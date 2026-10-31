@@ -57,6 +57,21 @@ async function getUrlStatistics(shortCode: string) {
   }
 }
 
+async function createCustomShortUrl(shortCode: string, url: string) {
+  console.log(`${shortCode} ${url}`);
+
+  try {
+    const res = await axios.post(`${API_BASE_URL}/custom`, {
+      shortCode: shortCode,
+      url: url,
+    });
+    return res.data;
+  } catch (error: any) {
+    console.error(error);
+    throw error;
+  }
+}
+
 function isUrlValid(str: string) {
   let url;
   try {
@@ -185,11 +200,24 @@ export default function Home() {
       .catch((error) => {});
   }
 
+  function handleCreateCustomShortUrl(shortCode: string, url: string) {
+    if (!validateUrl(url)) {
+      return;
+    }
+    if (!validateShortCode(shortCode)) {
+      return;
+    }
+    createCustomShortUrl(shortCode, url)
+      .then((data) => {
+        setShortenedUrl(`${UI_BASE_URL}/${data["shortCode"]}`);
+      })
+      .catch((error) => {});
+  }
+
   useEffect(() => {
     setInputUrl("");
     setOriginalUrl("");
     setShortCode("");
-    setOriginalUrl("");
     setShortenedUrl("");
     setUrlUpdated(false);
     setUrlDeleted(false);
@@ -213,6 +241,9 @@ export default function Home() {
       case UrlAction.GET_URL_STATISTICS:
         handleGetUrlStatistics(shortCode);
         break;
+      case UrlAction.CREATE_CUSTOM_SHORT_URL:
+        handleCreateCustomShortUrl(shortCode, inputUrl);
+        break;
       default:
         console.log("Unknown action");
     }
@@ -223,7 +254,7 @@ export default function Home() {
       <Typography.Title level={1}>URL Shortener</Typography.Title>
       <Select
         defaultValue={defaultAction}
-        style={{ width: 120 }}
+        style={{ width: 150 }}
         onChange={(value) => setAction(value)}
         options={[
           { value: UrlAction.CREATE_SHORT_URL, label: "Create" },
@@ -231,9 +262,11 @@ export default function Home() {
           { value: UrlAction.UPDATE_SHORT_URL, label: "Update" },
           { value: UrlAction.DELETE_SHORT_URL, label: "Delete" },
           { value: UrlAction.GET_URL_STATISTICS, label: "Get stats" },
+          { value: UrlAction.CREATE_CUSTOM_SHORT_URL, label: "Create custom" },
         ]}
       />
-      {action === UrlAction.UPDATE_SHORT_URL && (
+      {(action === UrlAction.UPDATE_SHORT_URL ||
+        action === UrlAction.CREATE_CUSTOM_SHORT_URL) && (
         <Input
           placeholder="Type your short code here..."
           onChange={(e) => setShortCode(e.target.value)}
@@ -260,7 +293,8 @@ export default function Home() {
           Submit
         </Button>
       </Space.Compact>
-      {action === UrlAction.CREATE_SHORT_URL && (
+      {(action === UrlAction.CREATE_SHORT_URL ||
+        action === UrlAction.CREATE_CUSTOM_SHORT_URL) && (
         <Typography.Link href={shortenedUrl} target="_blank">
           {shortenedUrl}
         </Typography.Link>
