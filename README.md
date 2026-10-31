@@ -6,4 +6,5 @@ A web app to shorten a URL
 
 - add ui
 - add docker
+- add flyway to migrate db
 - add redis
