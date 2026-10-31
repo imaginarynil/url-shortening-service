@@ -1,20 +1,11 @@
 "use client";
 
-import {
-  Button,
-  Dropdown,
-  Flex,
-  Input,
-  MenuProps,
-  Select,
-  Space,
-  Typography,
-} from "antd";
+import { Button, Input, Select, Space, Typography } from "antd";
 import axios from "axios";
-import Image from "next/image";
-import { MouseEvent, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 const API_BASE_URL = "http://localhost:8080/shorten";
+const UI_BASE_URL = "http://shortener";
 
 async function createShortUrl(url: string) {
   try {
@@ -46,6 +37,16 @@ async function updateShortUrl(shortCode: string, url: string) {
   }
 }
 
+async function deleteShortUrl(shortCode: string) {
+  try {
+    const res = await axios.delete(`${API_BASE_URL}/${shortCode}`);
+    return res.data;
+  } catch (error: any) {
+    console.error(error);
+    throw error;
+  }
+}
+
 function isUrlValid(str: string) {
   let url;
   try {
@@ -56,7 +57,7 @@ function isUrlValid(str: string) {
   return url.protocol === "http:" || url.protocol === "https:";
 }
 
-const Action = Object.freeze({
+const UrlAction = Object.freeze({
   CREATE_SHORT_URL: "CREATE_SHORT_URL",
   RETRIEVE_ORIGINAL_URL: "RETRIEVE_ORIGINAL_URL",
   UPDATE_SHORT_URL: "UPDATE_SHORT_URL",
@@ -66,12 +67,13 @@ const Action = Object.freeze({
 });
 
 export default function Home() {
-  const defaultAction = Action.CREATE_SHORT_URL;
+  const defaultAction = UrlAction.CREATE_SHORT_URL;
   const [inputUrl, setInputUrl] = useState("");
   const [originalUrl, setOriginalUrl] = useState("");
   const [shortCode, setShortCode] = useState("");
   const [action, setAction] = useState<string>(defaultAction);
   const [urlUpdated, setUrlUpdated] = useState(false);
+  const [urlDeleted, setUrlDeleted] = useState(false);
 
   function validateUrl(url: string) {
     if (url.trim().length === 0) {
@@ -134,24 +136,40 @@ export default function Home() {
       .catch((error) => {});
   }
 
+  function handleDeleteShortUrl(shortCode: string) {
+    if (!validateShortCode(shortCode)) {
+      return;
+    }
+    deleteShortUrl(shortCode)
+      .then((data) => {
+        setOriginalUrl(data["url"]);
+        setUrlDeleted(true);
+      })
+      .catch((error) => {});
+  }
+
   useEffect(() => {
     setInputUrl("");
     setOriginalUrl("");
     setShortCode("");
-    setUrlUpdated(false);
     setOriginalUrl("");
+    setUrlUpdated(false);
+    setUrlDeleted(false);
   }, [action]);
 
   function handleSubmit(e: any) {
     switch (action) {
-      case Action.CREATE_SHORT_URL:
+      case UrlAction.CREATE_SHORT_URL:
         handleCreateShortUrl(inputUrl);
         break;
-      case Action.RETRIEVE_ORIGINAL_URL:
+      case UrlAction.RETRIEVE_ORIGINAL_URL:
         handleRetrieveOriginalUrl(shortCode);
         break;
-      case Action.UPDATE_SHORT_URL:
+      case UrlAction.UPDATE_SHORT_URL:
         handleUpdateShortUrl(shortCode, inputUrl);
+        break;
+      case UrlAction.DELETE_SHORT_URL:
+        handleDeleteShortUrl(shortCode);
         break;
       default:
         console.log("Unknown action");
@@ -166,12 +184,13 @@ export default function Home() {
         style={{ width: 120 }}
         onChange={(value) => setAction(value)}
         options={[
-          { value: Action.CREATE_SHORT_URL, label: "Create" },
-          { value: Action.RETRIEVE_ORIGINAL_URL, label: "Get original" },
-          { value: Action.UPDATE_SHORT_URL, label: "Update" },
+          { value: UrlAction.CREATE_SHORT_URL, label: "Create" },
+          { value: UrlAction.RETRIEVE_ORIGINAL_URL, label: "Get original" },
+          { value: UrlAction.UPDATE_SHORT_URL, label: "Update" },
+          { value: UrlAction.DELETE_SHORT_URL, label: "Delete" },
         ]}
       />
-      {action === Action.UPDATE_SHORT_URL && (
+      {action === UrlAction.UPDATE_SHORT_URL && (
         <Input
           placeholder="Type your short code here..."
           onChange={(e) => setShortCode(e.target.value)}
@@ -179,7 +198,8 @@ export default function Home() {
         />
       )}
       <Space.Compact style={{ width: "100%" }}>
-        {action === Action.RETRIEVE_ORIGINAL_URL ? (
+        {action === UrlAction.RETRIEVE_ORIGINAL_URL ||
+        action === UrlAction.DELETE_SHORT_URL ? (
           <Input
             placeholder="Type your short code here..."
             onChange={(e) => setShortCode(e.target.value)}
@@ -196,15 +216,24 @@ export default function Home() {
           Submit
         </Button>
       </Space.Compact>
-      {(action === Action.RETRIEVE_ORIGINAL_URL ||
-        action === Action.UPDATE_SHORT_URL) && (
+      {action === UrlAction.RETRIEVE_ORIGINAL_URL && (
+        <Typography.Link href={originalUrl} target="_blank">
+          {originalUrl}
+        </Typography.Link>
+      )}
+      {action === UrlAction.UPDATE_SHORT_URL && (
         <Space>
-          {urlUpdated && <Typography.Text>Updated! New URL: </Typography.Text>}{" "}
-          <Typography.Link href={originalUrl} target="_blank">
-            {originalUrl}
-          </Typography.Link>
+          {urlUpdated && (
+            <Typography.Text>
+              Updated. New URL:{" "}
+              <Typography.Link href={originalUrl} target="_blank">
+                {originalUrl}
+              </Typography.Link>
+            </Typography.Text>
+          )}{" "}
         </Space>
       )}
+      {urlDeleted && <Typography.Text>Deleted {shortCode}</Typography.Text>}
     </Space>
   );
 }
