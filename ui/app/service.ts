@@ -1,6 +1,6 @@
-import UrlRepository from "./repository";
+import { UrlRepository, urlRepository } from "./repository";
 
-export default class UrlService {
+class UrlService {
   readonly urlRepository: UrlRepository;
 
   constructor(urlRepository: UrlRepository) {
@@ -67,3 +67,5 @@ export default class UrlService {
     }
   }
 }
+
+export const urlService = new UrlService(urlRepository);

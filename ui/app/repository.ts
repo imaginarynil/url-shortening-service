@@ -1,6 +1,9 @@
 import axios from "axios";
 
-export default class UrlRepository {
+const API_BASE_URL = "http://localhost:8080";
+export const API_URL = `${API_BASE_URL}/shorten`;
+
+export class UrlRepository {
   readonly apiUrl: string;
 
   constructor(apiUrl: string) {
@@ -34,3 +37,5 @@ export default class UrlRepository {
     });
   }
 }
+
+export const urlRepository = new UrlRepository(API_URL);

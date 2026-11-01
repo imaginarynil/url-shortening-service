@@ -1,8 +1,8 @@
 "use client";
 
 import { Button, Input, Select, Space, Typography } from "antd";
-import { useContext, useEffect, useState } from "react";
-import { UrlServiceContext } from "./context";
+import { useEffect, useState } from "react";
+import { urlService } from "./service";
 import { validateShortCode, validateUrl } from "./util";
 
 const UI_BASE_URL = "http://shortener.com";
@@ -35,7 +35,6 @@ export default function Application() {
   const [urlUpdated, setUrlUpdated] = useState(false);
   const [urlDeleted, setUrlDeleted] = useState(false);
   const [urlStatsGot, setUrlStatsGot] = useState(false);
-  const urlService = useContext(UrlServiceContext);
 
   function handleCreateShortUrl(url: string) {
     if (!validateUrl(url)) {
