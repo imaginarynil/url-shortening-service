@@ -39,8 +39,7 @@ class UrlService {
 
   async deleteShortUrl(shortCode: string) {
     try {
-      const res = await this.urlRepository.deleteShortUrl(shortCode);
-      return res.data;
+      await this.urlRepository.deleteShortUrl(shortCode);
     } catch (error: any) {
       console.error(error);
       throw error;

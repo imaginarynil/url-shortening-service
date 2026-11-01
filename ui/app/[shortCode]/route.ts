@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { validateShortCode } from "../util";
 import { urlService } from "../service";
+import { validateShortCode } from "../util";
 
 export async function GET(
   request: NextRequest,
