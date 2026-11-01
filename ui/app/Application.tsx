@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, Input, Select, Space, Typography } from "antd";
+import { Alert, Button, Input, Select, Space, Typography } from "antd";
 import { useEffect, useReducer } from "react";
 import { urlService } from "./service";
 import { validateShortCode, validateUrl } from "./util";
@@ -27,6 +27,8 @@ interface State {
   urlUpdated: boolean;
   urlDeleted: boolean;
   urlStatsGot: boolean;
+  loading: boolean;
+  error: string;
 }
 
 const initialState: State = {
@@ -39,6 +41,8 @@ const initialState: State = {
   urlUpdated: false,
   urlDeleted: false,
   urlStatsGot: false,
+  loading: false,
+  error: "",
 };
 
 const UrlReducerAction = Object.freeze({
@@ -49,6 +53,9 @@ const UrlReducerAction = Object.freeze({
   CHANGED_ACTION: "CHANGED_ACTION",
   CHANGED_SHORT_CODE: "CHANGED_SHORT_CODE",
   CHANGED_INPUT_URL: "CHANGED_INPUT_URL",
+  BEGAN_LOADING: "BEGAN_LOADING",
+  CHANGED_ERROR: "CHANGED_ERROR",
+  CLEARED_ERROR: "CLEARED_ERROR",
 });
 
 function urlReducer(state: State, action: any): State {
@@ -57,17 +64,20 @@ function urlReducer(state: State, action: any): State {
       return {
         ...state,
         shortUrl: action.shortUrl,
+        loading: false,
       };
     case UrlReducerAction.UPDATED_ORIGINAL_URL:
       return {
         ...state,
         originalUrl: action.originalUrl,
         urlUpdated: true,
+        loading: false,
       };
     case UrlReducerAction.DELETED_SHORT_URL:
       return {
         ...state,
         urlDeleted: true,
+        loading: false,
       };
     case UrlReducerAction.GOT_URL_STATS:
       return {
@@ -75,6 +85,7 @@ function urlReducer(state: State, action: any): State {
         shortUrl: action.shortUrl,
         accessCount: action.accessCount,
         urlStatsGot: true,
+        loading: false,
       };
     case UrlReducerAction.CHANGED_ACTION:
       return {
@@ -91,6 +102,22 @@ function urlReducer(state: State, action: any): State {
         ...state,
         inputUrl: action.inputUrl,
       };
+    case UrlReducerAction.BEGAN_LOADING:
+      return {
+        ...state,
+        loading: true,
+      };
+    case UrlReducerAction.CHANGED_ERROR:
+      return {
+        ...state,
+        error: action.error,
+        loading: false,
+      };
+    case UrlReducerAction.CLEARED_ERROR:
+      return {
+        ...state,
+        error: "",
+      };
     default:
       throw Error("Unknown action: " + action.type);
   }
@@ -99,8 +126,32 @@ function urlReducer(state: State, action: any): State {
 export default function Application() {
   const [state, dispatch] = useReducer(urlReducer, initialState);
 
-  function handleCreateShortUrl(url: string) {
+  // TODO: throw error from util
+  function handleValidateUrl(url: string) {
     if (!validateUrl(url)) {
+      dispatch({
+        type: UrlReducerAction.CHANGED_ERROR,
+        error: "URL is not valid",
+      });
+      return false;
+    }
+    return true;
+  }
+
+  // TODO: throw error from util
+  function handleValidateShortCode(shortCode: string) {
+    if (!validateShortCode(shortCode)) {
+      dispatch({
+        type: UrlReducerAction.CHANGED_ERROR,
+        error: "Short code is not valid",
+      });
+      return false;
+    }
+    return true;
+  }
+
+  function handleCreateShortUrl(url: string) {
+    if (!handleValidateUrl(url)) {
       return;
     }
     urlService
@@ -111,14 +162,19 @@ export default function Application() {
           shortUrl: `${BASE_URL}/${data["shortCode"]}`,
         });
       })
-      .catch((error) => {});
+      .catch((error) => {
+        dispatch({
+          type: UrlReducerAction.CHANGED_ERROR,
+          error: error.message,
+        });
+      });
   }
 
   function handleUpdateShortUrl(shortCode: string, url: string) {
-    if (!validateUrl(url)) {
+    if (!handleValidateUrl(url)) {
       return;
     }
-    if (!validateShortCode(shortCode)) {
+    if (!handleValidateShortCode(shortCode)) {
       return;
     }
     urlService
@@ -129,23 +185,33 @@ export default function Application() {
           originalUrl: data["url"],
         });
       })
-      .catch((error) => {});
+      .catch((error) => {
+        dispatch({
+          type: UrlReducerAction.CHANGED_ERROR,
+          error: error.message,
+        });
+      });
   }
 
   function handleDeleteShortUrl(shortCode: string) {
-    if (!validateShortCode(shortCode)) {
+    if (!handleValidateShortCode(shortCode)) {
       return;
     }
     urlService
       .deleteShortUrl(shortCode)
-      .then((data) => {
+      .then(() => {
         dispatch({ type: UrlReducerAction.DELETED_SHORT_URL });
       })
-      .catch((error) => {});
+      .catch((error) => {
+        dispatch({
+          type: UrlReducerAction.CHANGED_ERROR,
+          error: error.message,
+        });
+      });
   }
 
   function handleGetUrlStatistics(shortCode: string) {
-    if (!validateShortCode(shortCode)) {
+    if (!handleValidateShortCode(shortCode)) {
       return;
     }
     urlService
@@ -157,14 +223,19 @@ export default function Application() {
           accessCount: data["accessCount"],
         });
       })
-      .catch((error) => {});
+      .catch((error) => {
+        dispatch({
+          type: UrlReducerAction.CHANGED_ERROR,
+          error: error.message,
+        });
+      });
   }
 
   function handleCreateCustomShortUrl(shortCode: string, url: string) {
-    if (!validateUrl(url)) {
+    if (!handleValidateUrl(url)) {
       return;
     }
-    if (!validateShortCode(shortCode)) {
+    if (!handleValidateShortCode(shortCode)) {
       return;
     }
     urlService
@@ -175,10 +246,16 @@ export default function Application() {
           shortUrl: `${BASE_URL}/${data["shortCode"]}`,
         });
       })
-      .catch((error) => {});
+      .catch((error) => {
+        dispatch({
+          type: UrlReducerAction.CHANGED_ERROR,
+          error: error.message,
+        });
+      });
   }
 
   function handleSubmit(e: any) {
+    dispatch({ type: UrlReducerAction.BEGAN_LOADING });
     switch (state.action) {
       case UrlAction.CREATE_SHORT_URL:
         handleCreateShortUrl(state.inputUrl);
@@ -200,8 +277,23 @@ export default function Application() {
     }
   }
 
+  useEffect(() => {
+    if (state.error) {
+      setTimeout(() => {
+        dispatch({ type: UrlReducerAction.CLEARED_ERROR });
+      }, 2000);
+    }
+  }, [state.error]);
+
   return (
     <Space orientation="vertical">
+      {state.error && (
+        <Alert
+          title={state.error}
+          type="error"
+          closable={{ closeIcon: true, "aria-label": "close" }}
+        />
+      )}
       <Typography.Title level={1}>URL Shortener</Typography.Title>
       <Select
         defaultValue={DEFAULT_URL_ACTION}
@@ -255,7 +347,11 @@ export default function Application() {
             value={state.inputUrl}
           />
         )}
-        <Button type="primary" onClick={(e) => handleSubmit(e)}>
+        <Button
+          type="primary"
+          onClick={(e) => handleSubmit(e)}
+          loading={state.loading}
+        >
           Submit
         </Button>
       </Space.Compact>
