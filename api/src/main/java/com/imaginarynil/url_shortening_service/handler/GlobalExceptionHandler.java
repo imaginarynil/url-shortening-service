@@ -1,5 +1,6 @@
 package com.imaginarynil.url_shortening_service.handler;
 
+import com.imaginarynil.url_shortening_service.exception.ShortCodeIsNotValidException;
 import com.imaginarynil.url_shortening_service.exception.UrlExistsException;
 import com.imaginarynil.url_shortening_service.exception.UrlIsNotValidException;
 import com.imaginarynil.url_shortening_service.exception.UrlNotFoundException;
@@ -45,6 +46,13 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     protected ResponseEntity<Object> handleUrlExists(UrlExistsException e) {
         ApiError err = new ApiError(HttpStatus.BAD_REQUEST);
         err.setMessage(e.getMessage());
+        return this.buildResponseEntity(err);
+    }
+
+    @ExceptionHandler(ShortCodeIsNotValidException.class)
+    public ResponseEntity<Object> handleShortCodeIsNotValidException(ShortCodeIsNotValidException e) {
+        ApiError err = new ApiError(HttpStatus.BAD_REQUEST);
+        err.setMessage("Short code is not valid");
         return this.buildResponseEntity(err);
     }
 }

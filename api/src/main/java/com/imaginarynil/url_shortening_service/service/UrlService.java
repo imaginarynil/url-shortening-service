@@ -1,6 +1,7 @@
 package com.imaginarynil.url_shortening_service.service;
 
 import com.imaginarynil.url_shortening_service.entity.Url;
+import com.imaginarynil.url_shortening_service.exception.ShortCodeIsNotValidException;
 import com.imaginarynil.url_shortening_service.exception.UrlExistsException;
 import com.imaginarynil.url_shortening_service.exception.UrlIsNotValidException;
 import com.imaginarynil.url_shortening_service.exception.UrlNotFoundException;
@@ -88,6 +89,15 @@ public class UrlService {
         if (!isUrlValid(url.getUrl())) {
             throw new UrlIsNotValidException();
         }
+        // check if the custom short code tries to match > latestIndex in the database
+        if (this.urlShortener.isShortCode(url.getShortCode())) {
+            Url savedUrl = this.urlRepository.findTheLatestRecord();
+            long shortCodeInDecimal = this.urlShortener.convertToDecimal(url.getShortCode());
+            if (savedUrl != null && shortCodeInDecimal > savedUrl.getId()) {
+                throw new ShortCodeIsNotValidException();
+            }
+        }
+        // check if latest id + 1
         Url savedUrl = this.urlRepository.findByShortCode(url.getShortCode());
         if (savedUrl != null) {
             throw new UrlExistsException(UrlExistsException.getMessageWithShortCode(url.getShortCode()));
