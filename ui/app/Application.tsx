@@ -1,9 +1,10 @@
 "use client";
 
-import { Alert, Button, Input, Select, Space, Typography } from "antd";
+import { Alert, Button, Input, Layout, Select, Space, Typography } from "antd";
 import { useEffect, useReducer } from "react";
 import { urlService } from "./service";
 import { validateShortCode, validateUrl } from "./util";
+import { Content } from "antd/es/layout/layout";
 
 const BASE_URL = "http://localhost:3000";
 
@@ -122,6 +123,13 @@ function urlReducer(state: State, action: any): State {
       throw Error("Unknown action: " + action.type);
   }
 }
+
+const layoutStyle = {
+  borderRadius: 8,
+  overflow: "hidden",
+  width: "calc(50% - 8px)",
+  maxWidth: "calc(100% - 8px)",
+};
 
 export default function Application() {
   const [state, dispatch] = useReducer(urlReducer, initialState);
@@ -286,98 +294,119 @@ export default function Application() {
   }, [state.error]);
 
   return (
-    <Space orientation="vertical">
-      {state.error && (
-        <Alert
-          title={state.error}
-          type="error"
-          closable={{ closeIcon: true, "aria-label": "close" }}
-        />
-      )}
-      <Typography.Title level={1}>URL Shortener</Typography.Title>
-      <Select
-        defaultValue={DEFAULT_URL_ACTION}
-        style={{ width: 150 }}
-        onChange={(value) => {
-          dispatch({ type: UrlReducerAction.CHANGED_ACTION, action: value });
+    <Layout>
+      <Content
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          flexDirection: "column",
         }}
-        options={[
-          { value: UrlAction.CREATE_SHORT_URL, label: "Create" },
-          { value: UrlAction.UPDATE_SHORT_URL, label: "Update" },
-          { value: UrlAction.DELETE_SHORT_URL, label: "Delete" },
-          { value: UrlAction.GET_URL_STATISTICS, label: "Get stats" },
-          { value: UrlAction.CREATE_CUSTOM_SHORT_URL, label: "Create custom" },
-        ]}
-      />
-      {(state.action === UrlAction.UPDATE_SHORT_URL ||
-        state.action === UrlAction.CREATE_CUSTOM_SHORT_URL) && (
-        <Input
-          placeholder="Type your short code here..."
-          onChange={(e) => {
-            dispatch({
-              type: UrlReducerAction.CHANGED_SHORT_CODE,
-              shortCode: e.target.value,
-            });
-          }}
-          value={state.shortCode}
-        />
-      )}
-      <Space.Compact style={{ width: "100%" }}>
-        {state.action === UrlAction.DELETE_SHORT_URL ||
-        state.action === UrlAction.GET_URL_STATISTICS ? (
-          <Input
-            placeholder="Type your short code here..."
-            onChange={(e) => {
-              dispatch({
-                type: UrlReducerAction.CHANGED_SHORT_CODE,
-                shortCode: e.target.value,
-              });
-            }}
-            value={state.shortCode}
-          />
-        ) : (
-          <Input
-            placeholder="Type your URL here..."
-            onChange={(e) => {
-              dispatch({
-                type: UrlReducerAction.CHANGED_INPUT_URL,
-                inputUrl: e.target.value,
-              });
-            }}
-            value={state.inputUrl}
+      >
+        {state.error && (
+          <Alert
+            title={state.error}
+            type="error"
+            closable={{ closeIcon: true, "aria-label": "close" }}
+            style={{ position: "fixed", top: "2rem" }}
           />
         )}
-        <Button
-          type="primary"
-          onClick={(e) => handleSubmit(e)}
-          loading={state.loading}
+        <Space
+          orientation="vertical"
+          style={{ maxWidth: "50%", width: "100%" }}
         >
-          Submit
-        </Button>
-      </Space.Compact>
-      {(state.action === UrlAction.CREATE_SHORT_URL ||
-        state.action === UrlAction.CREATE_CUSTOM_SHORT_URL) && (
-        <Typography.Link href={state.shortUrl} target="_blank">
-          {state.shortUrl}
-        </Typography.Link>
-      )}
-      {state.urlUpdated && (
-        <Typography.Text>
-          Updated. New URL:{" "}
-          <Typography.Link href={state.originalUrl} target="_blank">
-            {state.originalUrl}
-          </Typography.Link>
-        </Typography.Text>
-      )}
-      {state.urlDeleted && (
-        <Typography.Text>Deleted {state.shortCode}</Typography.Text>
-      )}
-      {state.urlStatsGot && (
-        <Typography.Text>
-          {state.shortUrl} has been accessed {state.accessCount} time
-          {state.accessCount > 1 && "s"}
-        </Typography.Text>
-      )}
-    </Space>
+          <Typography.Title level={1}>URL Shortener</Typography.Title>
+          <Select
+            defaultValue={DEFAULT_URL_ACTION}
+            style={{ maxWidth: 150, width: "100%" }}
+            onChange={(value) => {
+              dispatch({
+                type: UrlReducerAction.CHANGED_ACTION,
+                action: value,
+              });
+            }}
+            options={[
+              { value: UrlAction.CREATE_SHORT_URL, label: "Create" },
+              { value: UrlAction.UPDATE_SHORT_URL, label: "Update" },
+              { value: UrlAction.DELETE_SHORT_URL, label: "Delete" },
+              { value: UrlAction.GET_URL_STATISTICS, label: "Get stats" },
+              {
+                value: UrlAction.CREATE_CUSTOM_SHORT_URL,
+                label: "Create custom",
+              },
+            ]}
+          />
+          {(state.action === UrlAction.UPDATE_SHORT_URL ||
+            state.action === UrlAction.CREATE_CUSTOM_SHORT_URL) && (
+            <Input
+              placeholder="Type your short code here..."
+              onChange={(e) => {
+                dispatch({
+                  type: UrlReducerAction.CHANGED_SHORT_CODE,
+                  shortCode: e.target.value,
+                });
+              }}
+              value={state.shortCode}
+            />
+          )}
+          <Space.Compact style={{ width: "100%" }}>
+            {state.action === UrlAction.DELETE_SHORT_URL ||
+            state.action === UrlAction.GET_URL_STATISTICS ? (
+              <Input
+                placeholder="Type your short code here..."
+                onChange={(e) => {
+                  dispatch({
+                    type: UrlReducerAction.CHANGED_SHORT_CODE,
+                    shortCode: e.target.value,
+                  });
+                }}
+                value={state.shortCode}
+              />
+            ) : (
+              <Input
+                placeholder="Type your URL here..."
+                onChange={(e) => {
+                  dispatch({
+                    type: UrlReducerAction.CHANGED_INPUT_URL,
+                    inputUrl: e.target.value,
+                  });
+                }}
+                value={state.inputUrl}
+              />
+            )}
+            <Button
+              type="primary"
+              onClick={(e) => handleSubmit(e)}
+              loading={state.loading}
+            >
+              Submit
+            </Button>
+          </Space.Compact>
+          {(state.action === UrlAction.CREATE_SHORT_URL ||
+            state.action === UrlAction.CREATE_CUSTOM_SHORT_URL) && (
+            <Typography.Link href={state.shortUrl} target="_blank">
+              {state.shortUrl}
+            </Typography.Link>
+          )}
+          {state.urlUpdated && (
+            <Typography.Text>
+              Updated. New URL:{" "}
+              <Typography.Link href={state.originalUrl} target="_blank">
+                {state.originalUrl}
+              </Typography.Link>
+            </Typography.Text>
+          )}
+          {state.urlDeleted && (
+            <Typography.Text>Deleted {state.shortCode}</Typography.Text>
+          )}
+          {state.urlStatsGot && (
+            <Typography.Text>
+              {state.shortUrl} has been accessed {state.accessCount} time
+              {state.accessCount > 1 && "s"}
+            </Typography.Text>
+          )}
+        </Space>
+      </Content>
+    </Layout>
   );
 }
