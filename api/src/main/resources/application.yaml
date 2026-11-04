@@ -2,9 +2,9 @@ spring:
   application:
     name: url-shortening-service
   datasource:
-    url: jdbc:mysql://localhost/url_shortening_service_dev
-    username: root
-    password: daniel
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
   jpa:
     show-sql: true
     properties:
