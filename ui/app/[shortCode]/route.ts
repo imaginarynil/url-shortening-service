@@ -4,7 +4,7 @@ import { validateShortCode } from "../util";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { shortCode: string } },
+  { params }: { params: Promise<{ shortCode: string }> },
 ) {
   const { shortCode } = await params;
   if (!validateShortCode(shortCode)) {
