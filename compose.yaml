@@ -40,32 +40,6 @@ services:
   #   depends_on:
   #     - api
 
-  ui-dev:
-    build:
-      context: ui
-      dockerfile: Dockerfile.dev
-      args:
-        NEXT_PUBLIC_API_BASE_URL: ${API_BASE_URL}
-        NEXT_PUBLIC_UI_BASE_URL: ${UI_BASE_URL}
-    ports:
-      - "${UI_PORT}:3000"
-    container_name: ui-dev
-    environment:
-      - WATCHPACK_POLLING=true
-    # mounts the source code to the app/app/ inside container
-    volumes:
-      - ./ui/app:/app/app
-    develop:
-      watch:
-        - action: sync+restart
-          path: .
-          target: /app
-          ignore:
-            - node_modules/
-            - .next/
-        - action: rebuild
-          path: package.json
-
 # volumes:
 #   db_data:
 
