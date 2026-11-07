@@ -1,6 +1,7 @@
 services:
   db:
     image: mysql:26
+    container_name: url-shortening-service-db-dev
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       MYSQL_DATABASE: ${MYSQL_DATABASE}
@@ -17,7 +18,10 @@ services:
       retries: 3
 
   api:
-    build: api
+    build:
+      context: api
+      dockerfile: Dockerfile.dev
+    container_name: url-shortening-service-api-dev
     ports:
       - "${API_PORT}:8080"
     depends_on:
@@ -27,6 +31,13 @@ services:
       SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/${MYSQL_DATABASE}
       SPRING_DATASOURCE_USERNAME: ${MYSQL_USER}
       SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD}
+    # develop:
+    #   watch:
+    #     - action: sync+restart
+    #       path: ./api/src/
+    #       target: /app
+    #     - action: rebuild
+    #       path: ./api/pom.xml
 
   # ui-prod:
   #   build:
@@ -36,7 +47,7 @@ services:
   #       NEXT_PUBLIC_UI_BASE_URL: ${UI_BASE_URL}
   #   ports:
   #     - "${UI_PORT}:3000"
-  #   container_name: ui-prod
+  #   container_name: url-shortening-service-ui-prod
   #   depends_on:
   #     - api
 
@@ -50,3 +61,4 @@ services:
 # https://medium.com/@yasiffkhan/using-docker-with-spring-boot-comprehensive-guide-d90ad94d2dcf
 # https://medium.com/@thearaseng/building-a-full-stack-product-app-with-react-spring-boot-and-docker-compose-64a47f4a1080
 # https://github.com/thearaseng/react-product-app
+# https://dev.to/jackfajardo/my-java-spring-boot-journey-part-1-containerized-app-with-hot-reload-4p71
