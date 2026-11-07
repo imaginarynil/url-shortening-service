@@ -1,9 +1,9 @@
 FROM maven:3.10.0-eclipse-temurin-27-alpine AS build
 
-WORKDIR /api
+WORKDIR /app
 
-COPY ./pom.xml /api
-COPY ./src /api/src
+COPY ./pom.xml /app
+COPY ./src /app/src
 
 RUN mvn clean package -D maven.test.skip=true
 
@@ -11,9 +11,9 @@ FROM eclipse-temurin:27-jdk-alpine
 
 VOLUME /tmp
 
-WORKDIR /api
+WORKDIR /app
 
-COPY --from=build /api/target/*.jar app.jar
+COPY --from=build /app/target/*.jar app.jar
 
 ENTRYPOINT ["java", "-jar", "app.jar"]
 
