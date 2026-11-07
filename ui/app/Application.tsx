@@ -6,8 +6,6 @@ import { urlService } from "./service";
 import { validateShortCode, validateUrl } from "./util";
 import { Content } from "antd/es/layout/layout";
 
-const BASE_URL = "http://localhost:3000";
-
 const UrlAction = Object.freeze({
   CREATE_SHORT_URL: "CREATE_SHORT_URL",
   UPDATE_SHORT_URL: "UPDATE_SHORT_URL",
@@ -167,7 +165,7 @@ export default function Application() {
       .then((data) => {
         dispatch({
           type: UrlReducerAction.CHANGED_SHORT_URL,
-          shortUrl: `${BASE_URL}/${data["shortCode"]}`,
+          shortUrl: `${process.env.NEXT_PUBLIC_UI_BASE_URL}/${data["shortCode"]}`,
         });
       })
       .catch((error) => {
@@ -227,7 +225,7 @@ export default function Application() {
       .then((data) => {
         dispatch({
           type: UrlReducerAction.GOT_URL_STATS,
-          shortUrl: `${BASE_URL}/${data["shortCode"]}`,
+          shortUrl: `${process.env.NEXT_PUBLIC_UI_BASE_URL}/${data["shortCode"]}`,
           accessCount: data["accessCount"],
         });
       })
@@ -251,7 +249,7 @@ export default function Application() {
       .then((data) => {
         dispatch({
           type: UrlReducerAction.CHANGED_SHORT_URL,
-          shortUrl: `${BASE_URL}/${data["shortCode"]}`,
+          shortUrl: `${process.env.NEXT_PUBLIC_UI_BASE_URL}/${data["shortCode"]}`,
         });
       })
       .catch((error) => {
