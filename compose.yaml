@@ -13,13 +13,13 @@ services:
     #   - "3307:3306"
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-      timeout: 10s
-      retries: 5
+      timeout: 5s
+      retries: 3
 
   api:
     build: api
     ports:
-      - "8080:8080"
+      - "${API_PORT}:8080"
     depends_on:
       db:
         condition: service_healthy
@@ -28,7 +28,43 @@ services:
       SPRING_DATASOURCE_USERNAME: ${MYSQL_USER}
       SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD}
 
-  # ui:
+  # ui-prod:
+  #   build:
+  #     context: ui
+  #     args:
+  #       NEXT_PUBLIC_API_BASE_URL: ${API_BASE_URL}
+  #       NEXT_PUBLIC_UI_BASE_URL: ${UI_BASE_URL}
+  #   ports:
+  #     - "${UI_PORT}:3000"
+  #   container_name: ui-prod
+  #   depends_on:
+  #     - api
+
+  ui-dev:
+    build:
+      context: ui
+      dockerfile: Dockerfile.dev
+      args:
+        NEXT_PUBLIC_API_BASE_URL: ${API_BASE_URL}
+        NEXT_PUBLIC_UI_BASE_URL: ${UI_BASE_URL}
+    ports:
+      - "${UI_PORT}:3000"
+    container_name: ui-dev
+    environment:
+      - WATCHPACK_POLLING=true
+    # mounts the source code to the app/app/ inside container
+    volumes:
+      - ./ui/app:/app/app
+    develop:
+      watch:
+        - action: sync+restart
+          path: .
+          target: /app
+          ignore:
+            - node_modules/
+            - .next/
+        - action: rebuild
+          path: package.json
 
 # volumes:
 #   db_data:
