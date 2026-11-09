@@ -95,6 +95,7 @@ function urlReducer(state: State, action: any): State {
       return {
         ...state,
         shortCode: action.shortCode,
+        urlDeleted: false,
       };
     case UrlReducerAction.CHANGED_INPUT_URL:
       return {
