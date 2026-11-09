@@ -1,6 +1,6 @@
 import { UrlRepository, urlRepository } from "./repository";
 
-class UrlService {
+export class UrlService {
   readonly urlRepository: UrlRepository;
 
   constructor(urlRepository: UrlRepository) {

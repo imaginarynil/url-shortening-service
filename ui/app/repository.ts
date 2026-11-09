@@ -1,6 +1,6 @@
 import axios from "axios";
 
-export const API_URL = `${process.env.NEXT_PUBLIC_API_BASE_URL}/shorten`;
+export const API_URL = `${process.env.NEXT_PUBLIC_API_BASE_URL_CLIENT}/shorten`;
 
 export class UrlRepository {
   readonly apiUrl: string;

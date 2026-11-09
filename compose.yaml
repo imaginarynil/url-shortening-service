@@ -39,17 +39,19 @@ services:
     #     - action: rebuild
     #       path: ./api/pom.xml
 
-  # ui-prod:
-  #   build:
-  #     context: ui
-  #     args:
-  #       NEXT_PUBLIC_API_BASE_URL: ${API_BASE_URL}
-  #       NEXT_PUBLIC_UI_BASE_URL: ${UI_BASE_URL}
-  #   ports:
-  #     - "${UI_PORT}:3000"
-  #   container_name: url-shortening-service-ui-prod
-  #   depends_on:
-  #     - api
+  ui:
+    build:
+      context: ui
+      dockerfile: Dockerfile.prod
+      args:
+        NEXT_PUBLIC_API_BASE_URL_SERVER: ${NEXT_PUBLIC_API_BASE_URL_SERVER}
+        NEXT_PUBLIC_API_BASE_URL_CLIENT: ${NEXT_PUBLIC_API_BASE_URL_CLIENT}
+        NEXT_PUBLIC_UI_BASE_URL: ${NEXT_PUBLIC_UI_BASE_URL}
+    container_name: url-shortening-service-ui-prod
+    ports:
+      - "${UI_PORT}:3000"
+    depends_on:
+      - api
 
 # volumes:
 #   db_data:
