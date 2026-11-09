@@ -18,6 +18,6 @@ COPY --from=build /app/target/*.jar app.jar
 ENTRYPOINT ["java", "-jar", "app.jar"]
 
 # References
-# https://medium.com/@yasiffkhan/using-docker-with-spring-boot-comprehensive-guide-d90ad94d2dcf
 # https://medium.com/@thearaseng/building-a-full-stack-product-app-with-react-spring-boot-and-docker-compose-64a47f4a1080
+# https://medium.com/@yasiffkhan/using-docker-with-spring-boot-comprehensive-guide-d90ad94d2dcf
 # https://github.com/jhordyess/dockerized-spring-react-mysql/tree/main
