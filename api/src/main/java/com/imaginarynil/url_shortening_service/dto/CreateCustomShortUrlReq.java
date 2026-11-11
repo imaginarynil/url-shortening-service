@@ -12,7 +12,7 @@ public class CreateCustomShortUrlReq {
     @Size(max = Constant.MAX_URL_SIZE)
     private String url;
     @NotBlank(message = "Short code cannot be blank")
-    @Size(min = 5, max = 32)
+    @Size(min = 5, max = 32, message = "Short code length must be between 5 and 32 inclusive")
     @Pattern(regexp = "^[A-Za-z0-9]+$", message = "Short code can only contain letters or numbers")
     private String shortCode;
 }
