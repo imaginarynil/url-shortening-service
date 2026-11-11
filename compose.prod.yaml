@@ -1,17 +1,14 @@
 services:
   db:
     image: mysql:26
-    container_name: url-shortening-service-db-dev
+    container_name: url-shortening-service-db-prod
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       MYSQL_DATABASE: ${MYSQL_DATABASE}
       MYSQL_USER: ${MYSQL_USER}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     volumes:
-      # - db_data:/var/lib/mysql
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
-    # ports:
-    #   - "3307:3306"
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       timeout: 5s
@@ -20,8 +17,8 @@ services:
   api:
     build:
       context: api
-      dockerfile: Dockerfile.dev
-    container_name: url-shortening-service-api-dev
+      dockerfile: Dockerfile.prod
+    container_name: url-shortening-service-api-prod
     ports:
       - "${API_PORT}:8080"
     depends_on:
@@ -31,13 +28,6 @@ services:
       SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/${MYSQL_DATABASE}
       SPRING_DATASOURCE_USERNAME: ${MYSQL_USER}
       SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD}
-    # develop:
-    #   watch:
-    #     - action: sync+restart
-    #       path: ./api/src/
-    #       target: /app
-    #     - action: rebuild
-    #       path: ./api/pom.xml
 
   ui:
     build:
@@ -52,15 +42,3 @@ services:
       - "${UI_PORT}:3000"
     depends_on:
       - api
-
-# volumes:
-#   db_data:
-
-# Notes
-# delete volumes if there is a problem with username and password and api cannot connect to database
-
-# References
-# https://medium.com/@yasiffkhan/using-docker-with-spring-boot-comprehensive-guide-d90ad94d2dcf
-# https://medium.com/@thearaseng/building-a-full-stack-product-app-with-react-spring-boot-and-docker-compose-64a47f4a1080
-# https://github.com/thearaseng/react-product-app
-# https://dev.to/jackfajardo/my-java-spring-boot-journey-part-1-containerized-app-with-hot-reload-4p71
