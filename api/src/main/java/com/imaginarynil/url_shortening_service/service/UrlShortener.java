@@ -39,7 +39,7 @@ public class UrlShortener {
     }
 
     public boolean isShortCode(String id) {
-        if(id.length() != 6) {
+        if(id.length() != SHORTCODE_LENGTH) {
             return false;
         }
         Pattern p = Pattern.compile("^[0-9A-Za-z]+$");
