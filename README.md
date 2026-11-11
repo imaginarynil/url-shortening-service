@@ -2,9 +2,8 @@
 
 A web app to shorten a URL
 
+https://roadmap.sh/projects/url-shortening-service
+
 ## TODO:
 
-- add ui
-- add docker
-- add flyway to migrate db
-- add redis
+- [ ] API: Add tests
