@@ -97,7 +97,6 @@ public class UrlService {
                 throw new ShortCodeIsNotValidException();
             }
         }
-        // check if latest id + 1
         Url savedUrl = this.urlRepository.findByShortCode(url.getShortCode());
         if (savedUrl != null) {
             throw new UrlExistsException(UrlExistsException.getMessageWithShortCode(url.getShortCode()));
