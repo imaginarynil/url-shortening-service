@@ -4,6 +4,9 @@ A full-stack application to shorten a URL. The app can create, retrieve, update,
 
 This is a solution for [URL Shortening Service](https://roadmap.sh/projects/url-shortening-service).
 
+Video demonstration of the app:
+[[Project] URL Shortening Service Demo](https://youtu.be/yjFW4wurR6E?si=x2wbLajaOU1hlO6c)
+
 ## Features
 
 - Create a new short URL
